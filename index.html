@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Есть / Нету</title>
+    
+    <meta name="theme-color" content="#0f0c29">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ЕстьНету">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0c29;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        /* Фон */
+        .bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0c29, #1a1a2e, #16213e);
+            z-index: 0;
+        }
+
+        /* Пятна света */
+        .bg::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(108, 92, 231, 0.3), transparent 70%);
+            top: 20%;
+            left: -100px;
+            animation: moveLight1 8s ease-in-out infinite;
+        }
+
+        .bg::after {
+            content: '';
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(0, 206, 209, 0.25), transparent 70%);
+            bottom: 20%;
+            right: -80px;
+            animation: moveLight2 10s ease-in-out infinite;
+        }
+
+        @keyframes moveLight1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(80px, -40px); }
+        }
+
+        @keyframes moveLight2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-60px, 50px); }
+        }
+
+        /* Частицы */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(110vh) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* Контейнер */
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 90%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 50px;
+        }
+
+        /* Стеклянная карточка */
+        .card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: 36px;
+            padding: 50px 30px 40px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 35px;
+        }
+
+        /* Эмодзи */
+        .emoji {
+            font-size: 64px;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .emoji.pop {
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.25); }
+            100% { transform: scale(1); }
+        }
+
+        /* Текст статуса */
+        .status {
+            font-size: 80px;
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+
+        .status.yes {
+            background: linear-gradient(to right, #00b894, #00cec9, #55efc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 40px rgba(0, 206, 201, 0.7));
+        }
+
+        .status.no {
+            background: linear-gradient(to right, #ff6b6b, #ee5a24, #f0932b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 40px rgba(255, 107, 107, 0.7));
+        }
+
+        /* Пульсация свечения */
+        .glow-pulse {
+            animation: glowPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { filter: drop-shadow(0 0 30px currentColor); }
+            50% { filter: drop-shadow(0 0 60px currentColor); }
+        }
+
+        /* Индикатор */
+        .saved {
+            font-size: 12px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.4);
+            opacity: 0;
+            transform: translateY(5px);
+            transition: all 0.4s ease;
+        }
+
+        .saved.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Кнопки */
+        .buttons {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 22px 10px;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            border-radius: 26px;
+            cursor: pointer;
+            color: white;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn:active {
+            transform: scale(0.94);
+            transition: transform 0.1s ease;
+        }
+
+        .btn-yes {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            box-shadow: 0 10px 35px rgba(0, 206, 201, 0.3);
+        }
+
+        .btn-yes:active {
+            box-shadow: 0 5px 20px rgba(0, 206, 201, 0.5);
+            background: linear-gradient(135deg, #009d7d, #00b5b0);
+        }
+
+        .btn-no {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            box-shadow: 0 10px 35px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-no:active {
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.5);
+            background: linear-gradient(135deg, #e55a5a, #d44a1a);
+        }
+
+        /* Ripple */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            animation: rippleOut 0.6s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes rippleOut {
+            to {
+                transform: scale(5);
+                opacity: 0;
+            }
+        }
+
+        /* Адаптация */
+        @media (max-width: 360px) {
+            .status {
+                font-size: 60px;
+                letter-spacing: 4px;
+            }
+            .emoji {
+                font-size: 50px;
+            }
+            .btn {
+                padding: 18px 8px;
+                font-size: 15px;
+                border-radius: 22px;
+            }
+            .buttons {
+                gap: 14px;
+            }
+            .card {
+                padding: 35px 16px 30px;
+                gap: 25px;
+                border-radius: 28px;
+            }
+            .container {
+                gap: 35px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg"></div>
+    <div class="particles" id="particles"></div>
+
+    <div class="container">
+        <div class="card">
+            <div class="emoji pop" id="emoji">👀</div>
+            <div class="status yes glow-pulse" id="status">ЕСТЬ</div>
+            <div class="saved" id="saved">✓ Сохранено</div>
+            <div class="buttons">
+                <button class="btn btn-yes" id="btnYes">✓ ЕСТЬ</button>
+                <button class="btn btn-no" id="btnNo">✕ НЕТУ</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Элементы
+        const emoji = document.getElementById('emoji');
+        const status = document.getElementById('status');
+        const saved = document.getElementById('saved');
+        const btnYes = document.getElementById('btnYes');
+        const btnNo = document.getElementById('btnNo');
+
+        // Загрузка
+        const savedStatus = localStorage.getItem('foodStatus');
+        if (savedStatus === 'no') {
+            setNo(false);
+        }
+
+        function setYes(save = true) {
+            status.textContent = 'ЕСТЬ';
+            status.className = 'status yes glow-pulse';
+            emoji.textContent = '😋';
+            popEmoji();
+            if (save) {
+                localStorage.setItem('foodStatus', 'yes');
+                showSaved();
+            }
+        }
+
+        function setNo(save = true) {
+            status.textContent = 'НЕТУ';
+            status.className = 'status no glow-pulse';
+            emoji.textContent = '😐';
+            popEmoji();
+            if (save) {
+                localStorage.setItem('foodStatus', 'no');
+                showSaved();
+            }
+        }
+
+        function popEmoji() {
+            emoji.classList.remove('pop');
+            void emoji.offsetWidth;
+            emoji.classList.add('pop');
+        }
+
+        function showSaved() {
+            saved.classList.add('visible');
+            clearTimeout(saved._timer);
+            saved._timer = setTimeout(() => {
+                saved.classList.remove('visible');
+            }, 1500);
+        }
+
+        function ripple(e, btn) {
+            const r = document.createElement('span');
+            r.className = 'ripple';
+            const rect = btn.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            r.style.width = r.style.height = size + 'px';
+            r.style.left = (e.clientX - rect.left - size / 2) + 'px';
+            r.style.top = (e.clientY - rect.top - size / 2) + 'px';
+            btn.appendChild(r);
+            r.addEventListener('animationend', () => r.remove());
+        }
+
+        btnYes.addEventListener('click', (e) => {
+            ripple(e, btnYes);
+            setYes();
+        });
+
+        btnNo.addEventListener('click', (e) => {
+            ripple(e, btnNo);
+            setNo();
+        });
+
+        // Частицы
+        (function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = [
+                '#00cec9', '#ff6b6b', '#6c5ce7', '#fff', '#fdcb6e', '#55efc4'
+            ];
+            for (let i = 0; i < 30; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.width = p.style.height = (Math.random() * 4 + 2) + 'px';
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                p.style.boxShadow = `0 0 ${Math.random() * 8 + 4}px ${p.style.background}`;
+                p.style.animationDuration = (Math.random() * 8 + 6) + 's';
+                p.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(p);
+            }
+        })();
+
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            const swJs = `
+                const CACHE = 'est-netu-v6';
+                self.addEventListener('install', e => self.skipWaiting());
+                self.addEventListener('activate', e => {
+                    e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== CACHE).map(x => caches.delete(x)))));
+                    self.clients.claim();
+                });
+                self.addEventListener('fetch', e => {
+                    if (e.request.method !== 'GET') return;
+                    e.respondWith(
+                        caches.match(e.request).then(c => c || fetch(e.request).then(r => {
+                            if (r && r.status === 200) {
+                                const clone = r.clone();
+                                caches.open(CACHE).then(cache => cache.put(e.request, clone));
+                            }
+                            return r;
+                        }))
+                    );
+                });
+            `;
+            const swBlob = new Blob([swJs], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(swBlob);
+            navigator.serviceWorker.register(swUrl, { scope: '/' }).catch(() => {});
+        }
+
+        // Manifest
+        const manifest = {
+            name: 'Есть / Нету',
+            short_name: 'ЕстьНету',
+            start_url: location.href.split('?')[0],
+            scope: location.href.split('?')[0],
+            display: 'standalone',
+            background_color: '#0f0c29',
+            theme_color: '#0f0c29',
+            orientation: 'portrait',
+            icons: [{
+                src: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="#0f0c29"/><text y="320" x="256" text-anchor="middle" font-size="300">🍽️</text></svg>'),
+                sizes: '512x512',
+                type: 'image/svg+xml',
+                purpose: 'any maskable'
+            }]
+        };
+        const mBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+        const mUrl = URL.createObjectURL(mBlob);
+        const mLink = document.createElement('link');
+        mLink.rel = 'manifest';
+        mLink.href = mUrl;
+        document.head.appendChild(mLink);
+    </script>
+
+</body>
+</html>
